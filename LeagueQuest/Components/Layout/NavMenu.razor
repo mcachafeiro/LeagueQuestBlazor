@@ -1,6 +1,20 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using LeagueQuest.Models
+@using LeagueQuest.Services
+@inject PlayerService PlayerService
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">LeagueQuest</a>
+        <div class="navbar-text">
+            @if (player == null)
+            {
+                <p>Loading...</p>
+            }
+            else
+            {
+                <p>@player?.Name</p>
+            }
+        </div>
     </div>
 </div>
 
@@ -27,4 +41,13 @@
         </div>
     </nav>
 </div>
+
+@code {
+    private Player player;
+
+    protected override async Task OnInitializedAsync()
+    {
+        player = await PlayerService.GetRandomPlayer();
+    }
+}
 
