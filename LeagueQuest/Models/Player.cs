@@ -7,7 +7,7 @@ public partial class Player
 {
     public string Name { get; set; } = null!;
 
-    public string Date { get; set; } = null!;
+    public DateOnly Date { get; set; }
 
     public string Country { get; set; } = null!;
 

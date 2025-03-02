@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using LeagueQuest.Models;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
 
-namespace LeagueQuest.Models;
+namespace LeagueQuest.Data;
 
-public partial class LeagueQuestContext : DbContext
+public partial class ApplicationDbContext : DbContext
 {
-    public LeagueQuestContext()
+    public ApplicationDbContext()
     {
     }
 
-    public LeagueQuestContext(DbContextOptions<LeagueQuestContext> options)
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
     }
@@ -22,7 +23,7 @@ public partial class LeagueQuestContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySql("server=localhost;database=league_quest;user=root;password=maveca1926", Microsoft.EntityFrameworkCore.ServerVersion.Parse("9.2.0-mysql"));
+        => optionsBuilder.UseMySql("server=localhost;database=leaguequest;user=root;password=25262862", Microsoft.EntityFrameworkCore.ServerVersion.Parse("9.2.0-mysql"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,9 +43,7 @@ public partial class LeagueQuestContext : DbContext
             entity.Property(e => e.Country)
                 .HasMaxLength(50)
                 .HasColumnName("country");
-            entity.Property(e => e.Date)
-                .HasMaxLength(10)
-                .HasColumnName("date");
+            entity.Property(e => e.Date).HasColumnName("date");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .HasColumnName("name");
@@ -67,9 +66,7 @@ public partial class LeagueQuestContext : DbContext
 
             entity.HasIndex(e => e.Id, "id");
 
-            entity.Property(e => e.Date)
-                .HasMaxLength(10)
-                .HasColumnName("date");
+            entity.Property(e => e.Date).HasColumnName("date");
             entity.Property(e => e.Id).HasColumnName("id");
 
             entity.HasOne(d => d.IdNavigation).WithMany(p => p.Playersotds)

@@ -7,7 +7,7 @@ public partial class Playersotd
 {
     public int Id { get; set; }
 
-    public string Date { get; set; } = null!;
+    public DateOnly Date { get; set; }
 
     public virtual Player IdNavigation { get; set; } = null!;
 }

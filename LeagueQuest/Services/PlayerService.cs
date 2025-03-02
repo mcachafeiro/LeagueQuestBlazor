@@ -1,4 +1,5 @@
-﻿using LeagueQuest.DTO;
+﻿using LeagueQuest.Data;
+using LeagueQuest.DTO;
 using LeagueQuest.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,9 +7,9 @@ namespace LeagueQuest.Services
 {
     public class PlayerService
     {
-        private readonly LeagueQuestContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public PlayerService(LeagueQuestContext context)
+        public PlayerService(ApplicationDbContext context)
         {
             _context = context;
         }
@@ -26,9 +27,9 @@ namespace LeagueQuest.Services
         private async Task<Player> GetPlayerOTD()
         {
             Player? playerOTD = null;
+            var today = DateOnly.FromDateTime(DateTime.Now);
 
-            // arreglar dates
-            int? playerOTDId = await _context.Playersotds.Where(m => m.Date == "").Select(p => p.Id).FirstOrDefaultAsync();
+            int? playerOTDId = await _context.Playersotds.Where(m => m.Date == today).Select(p => p.Id).FirstOrDefaultAsync();
 
             if (playerOTDId == null)
             {
@@ -41,7 +42,7 @@ namespace LeagueQuest.Services
 
                 if(playerOTDId != null)
                 {
-                    await _context.Playersotds.AddAsync(new Playersotd { Id = playerOTDId.Value, Date = "" });
+                    await _context.Playersotds.AddAsync(new Playersotd { Id = playerOTDId.Value, Date = today });
                 }
             }
 
@@ -96,12 +97,12 @@ namespace LeagueQuest.Services
             if (!result.IsPlayer)
             {
                 result.Age.Guessed = player.Date == playerOTD.Date;
-                //result.Age.NumberClue = player.Date > playerOTD.Date ? 1 : 0;
+                result.Age.NumberClue = result.Age.Guessed ? null : player.Date > playerOTD.Date ? NumberClue.Lower : NumberClue.Lower;
 
                 result.Country.Guessed = player.Country == playerOTD.Country;
 
                 result.Number.Guessed = player.Number == playerOTD.Number;
-                result.Number.NumberClue = player.Number == playerOTD.Number ? null : player.Number > playerOTD.Number ? NumberClue.Higher : NumberClue.Lower;
+                result.Number.NumberClue = result.Number.Guessed ? null : player.Number > playerOTD.Number ? NumberClue.Higher : NumberClue.Lower;
 
                 result.Team.Guessed = player.Team == playerOTD.Team;
 
