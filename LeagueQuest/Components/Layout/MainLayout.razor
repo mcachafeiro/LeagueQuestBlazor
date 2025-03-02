@@ -1,19 +1,38 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+<div class="container">
+    <div class="header">
+        <img src="Assets/Header/tuerca.svg" alt="">
+        <img src="Assets/Header/LeagueQuest-05.png" alt="">
+        <img src="Assets/Header/mundo.svg" alt="">
+    </div>
+    <div class="mode">
+        <div class="frase">Guess the Premier League player</div>
+        <div class="button-mode">
+            <img src="Assets/Rectangulos/RectanguloIndex.svg" alt="">
+            <div class="button-title">Classic</div>
+            <div class="button-description">Get hints in each try</div>
+        </div>
+        <div class="button-mode">
+            <img src="Assets/Rectangulos/RectanguloIndex.svg" alt="">
+            <div class="button-title">Blurred</div>
+            <div class="button-description">Who is this player?</div>
+        </div>
+        <NavLink href="weather" class="button-mode">
+            <img src="Assets/Rectangulos/RectanguloIndex.svg" alt="">
+            <div class="button-title">Career Path</div>
+            <div class="button-description">Guess</div>
+        </NavLink>
+    </div>
+    <div class="bot">
+        <div class="lq">
+            <div>leagueQuest.me</div>
+            <div>2024</div>
+        </div>
+        <div class="policy">Privacy policy</div>
     </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
+    <img src="Assets/Players/Aaron Cresswell.png" alt="">
 </div>
 
 <div id="blazor-error-ui">
