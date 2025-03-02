@@ -1,4 +1,5 @@
-﻿using LeagueQuest.Models;
+﻿using LeagueQuest.DTO;
+using LeagueQuest.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace LeagueQuest.Services
@@ -20,6 +21,102 @@ namespace LeagueQuest.Services
                 throw new Exception("No player found");
             }
             return player;
+        }
+
+        private async Task<Player> GetPlayerOTD()
+        {
+            Player? playerOTD = null;
+
+            // arreglar dates
+            int? playerOTDId = await _context.Playersotds.Where(m => m.Date == "").Select(p => p.Id).FirstOrDefaultAsync();
+
+            if (playerOTDId == null)
+            {
+                Random rnd = new Random();
+
+                do
+                {
+                    playerOTDId = rnd.Next();
+                } while (await _context.Players.AnyAsync(p => p.Id == playerOTDId));
+
+                if(playerOTDId != null)
+                {
+                    await _context.Playersotds.AddAsync(new Playersotd { Id = playerOTDId.Value, Date = "" });
+                }
+            }
+
+            playerOTD = await _context.Players.FirstOrDefaultAsync(p => p.Id == playerOTDId);
+
+
+            if (playerOTD == null)
+            {
+                throw new Exception("No player found");
+            }
+
+            return playerOTD;
+        }
+
+        public async Task<List<Player>> SearchPlayers(string filter)
+        {
+            var players = new List<Player>();
+
+            if (String.IsNullOrEmpty(filter))
+            {
+                players = await _context.Players
+                    .Where(p => p.Name.ToLower().Contains(filter.ToLower()))
+                    .OrderBy(p => p.Name)
+                    .Take(10)
+                    .ToListAsync();
+            }
+
+            return players;
+        }
+
+        public async Task<TryDTO> Guess(int playerId)
+        {
+            var player = await _context.Players.FirstOrDefaultAsync(p => p.Id == playerId);
+            if (player == null)
+            {
+                throw new Exception("No player found");
+            }
+
+            var playerOTD = await GetPlayerOTD();
+
+            var result = new TryDTO
+            {
+                IsPlayer = playerId == playerOTD.Id,
+                Player = player,
+                Age = new ClueDTO { Guessed = true },
+                Country = new ClueDTO { Guessed = true },
+                Number = new ClueDTO { Guessed = true },
+                Team = new ClueDTO { Guessed = true },
+                Position = new ClueDTO { Guessed = true }
+            };
+
+            if (!result.IsPlayer)
+            {
+                result.Age.Guessed = player.Date == playerOTD.Date;
+                //result.Age.NumberClue = player.Date > playerOTD.Date ? 1 : 0;
+
+                result.Country.Guessed = player.Country == playerOTD.Country;
+
+                result.Number.Guessed = player.Number == playerOTD.Number;
+                result.Number.NumberClue = player.Number == playerOTD.Number ? null : player.Number > playerOTD.Number ? NumberClue.Higher : NumberClue.Lower;
+
+                result.Team.Guessed = player.Team == playerOTD.Team;
+
+                var playerPositions = new HashSet<string>(player.Position.Split(",").Select(p => p.Trim()));
+                var playerOTDPositions = new HashSet<string>(playerOTD.Position.Split(",").Select(p => p.Trim()));
+
+                result.Position.Guessed = playerPositions.SetEquals(playerOTDPositions);
+
+                if (!result.Position.Guessed)
+                {
+                    result.Position.PositionClue = playerPositions.Overlaps(playerOTDPositions) ? PositionClue.Medium : PositionClue.Wrong;
+                }
+            }
+
+            return result;
         }
     }
 }
