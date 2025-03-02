@@ -70,19 +70,20 @@ div, body, img, p, input, button, form, ul, li {
 /* General rules */
 body {
     background-color: var(--color-2);
-    padding: 8px 0;
     font-family: 'Poppins', sans-serif;
 }
 
 .container {
+    padding: 8px 0;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     flex-direction: column;
     text-align: center;
     width: min(80%,500px); /*falta clamp*/
     gap: 80px;
     margin: 0 auto;
+    min-height: 100vh;
 }
 
 .header {
@@ -219,7 +220,7 @@ input[type="text"] {
     border-radius:40px;
     background-image: radial-gradient(circle at 38px 40px, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0) 40px, blue 40px);
     color: #FFF; */
-    background: url(../Rectangulos/RectanguloInput.svg) no-repeat;
+    background: url(Assets/Rectangulos/RectanguloInput.svg) no-repeat;
     background-size: contain;
     background-position: center;
     border: none;
@@ -231,7 +232,7 @@ input[type="text"] {
 }
 
 form > div {
-    background: url(../Rectangulos/play.svg) no-repeat;
+    background: url(Assets/Rectangulos/play.svg) no-repeat;
     background-size: contain;
     background-position: center;
     position: relative;
@@ -336,7 +337,6 @@ form > div {
 
 .player {
     background-color: var(--color-3);
-    /* background-image: url("../Players/Enzo Fernandez.png"); */
     background-size: contain;
     background-repeat: no-repeat;
     background-position: bottom center;
@@ -351,32 +351,26 @@ form > div {
     }
 
 .team {
-    /* background-color: var(--color-7);
-    background-image: url("../teams/chelsea.svg"); */
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
 }
 
 .country {
-    /* background-color: var(--color-7); */
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-    .country > div {
-        /* background-image: url("../flags/ar.svg"); */
-        background-size: cover;
-        background-position: center center;
-        border-radius: 50%;
-        width: 100%;
-        height: 86.66%;
-    }
+.country > div {
+    background-size: cover;
+    background-position: center center;
+    border-radius: 50%;
+    width: 100%;
+    height: 86.66%;
+}
 
 .number, .age {
-    /* background-color: var(--color-8);
-    background-image: url("../Rectangulos/higher.svg"); */
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;

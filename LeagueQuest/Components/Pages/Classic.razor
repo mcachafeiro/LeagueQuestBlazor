@@ -1,0 +1,49 @@
+﻿@page "/Classic"
+@using LeagueQuest.Models
+@using LeagueQuest.Services
+@inject PlayerService PlayerService
+
+<div class="classic-container">
+    <div class="guess golden-border">
+        <div>Guess today's Premier League player!</div>
+        <div>Type any player to begin.</div>
+    </div>
+    <form action="">
+        <input type="text" placeholder="Type player name ...">
+        <button type="submit" disabled hidden aria-hidden="true"></button>
+        <div id="button"></div>
+    </form>
+    <div id="reference">
+        <ul id="options"></ul>
+
+    </div>
+
+    <div id="answer"></div>
+    <div class="color-indicators golden-border">
+        <div>Color indicators</div>
+        <div class="colors">
+            <div class="correct">
+                <div></div>
+                <div>Correct</div>
+            </div>
+            <div class="partial">
+                <div></div>
+                <div>Partial</div>
+            </div>
+            <div class="incorrect">
+                <div></div>
+                <div>Incorrect</div>
+            </div>
+        </div>
+    </div>
+    <div id="yesterday">Yesterday's player was <span>@yesterdaysPlayer</span></div>
+</div>
+
+@code {
+    private string yesterdaysPlayer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        yesterdaysPlayer = await PlayerService.GetYesterdaysPlayerOTD();
+    }
+}

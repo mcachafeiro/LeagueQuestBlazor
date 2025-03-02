@@ -24,6 +24,17 @@ namespace LeagueQuest.Services
             return player;
         }
 
+        public async Task<string> GetYesterdaysPlayerOTD()
+        {
+            var yesterday = DateOnly.FromDateTime(DateTime.Now).AddDays(-1);
+
+            var playerName = await _context.Playersotds.Where(p => p.Date == yesterday).Select(p => p.IdNavigation.Name).FirstOrDefaultAsync();
+
+            playerName = playerName ?? string.Empty;
+
+            return playerName;
+        }
+
         private async Task<Player> GetPlayerOTD()
         {
             Player? playerOTD = null;
