@@ -14,16 +14,6 @@ namespace LeagueQuest.Services
             _context = context;
         }
 
-        public async Task<Player> GetRandomPlayer()
-        {
-            var player = await _context.Players.FirstOrDefaultAsync();
-            if (player == null)
-            {
-                throw new Exception("No player found");
-            }
-            return player;
-        }
-
         public async Task<string> GetYesterdaysPlayerOTD()
         {
             var yesterday = DateOnly.FromDateTime(DateTime.Now).AddDays(-1);
@@ -42,15 +32,15 @@ namespace LeagueQuest.Services
 
             int? playerOTDId = await _context.Playersotds.Where(m => m.Date == today).Select(p => p.Id).FirstOrDefaultAsync();
 
-            if (playerOTDId == null)
+            if (playerOTDId == 0)
             {
                 Random rnd = new Random();
-
+                int maxId = await _context.Players.MaxAsync(p => p.Id);
                 do
                 {
-                    playerOTDId = rnd.Next();
-                } while (await _context.Players.AnyAsync(p => p.Id == playerOTDId));
-
+                    playerOTDId = rnd.Next(maxId);
+                } while (!await _context.Players.AnyAsync(p => p.Id == playerOTDId) && await _context.Playersotds.AnyAsync(p => p.Id == playerOTDId));
+                // mirar concurrencias (si dos entran a la vez), mirar background service para que ejecute por detras
                 if(playerOTDId != null)
                 {
                     await _context.Playersotds.AddAsync(new Playersotd { Id = playerOTDId.Value, Date = today });
@@ -65,6 +55,8 @@ namespace LeagueQuest.Services
                 throw new Exception("No player found");
             }
 
+            await _context.SaveChangesAsync();
+
             return playerOTD;
         }
 
@@ -72,7 +64,7 @@ namespace LeagueQuest.Services
         {
             var players = new List<Player>();
 
-            if (String.IsNullOrEmpty(filter))
+            if (!String.IsNullOrWhiteSpace(filter))
             {
                 players = await _context.Players
                     .Where(p => p.Name.ToLower().Contains(filter.ToLower()))
@@ -117,8 +109,8 @@ namespace LeagueQuest.Services
 
                 result.Team.Guessed = player.Team == playerOTD.Team;
 
-                var playerPositions = new HashSet<string>(player.Position.Split(",").Select(p => p.Trim()));
-                var playerOTDPositions = new HashSet<string>(playerOTD.Position.Split(",").Select(p => p.Trim()));
+                var playerPositions = player.PositionsHashSet;
+                var playerOTDPositions = playerOTD.PositionsHashSet;
 
                 result.Position.Guessed = playerPositions.SetEquals(playerOTDPositions);
 

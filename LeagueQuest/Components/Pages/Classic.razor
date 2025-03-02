@@ -2,6 +2,7 @@
 @using LeagueQuest.Models
 @using LeagueQuest.Services
 @inject PlayerService PlayerService
+@rendermode InteractiveServer
 
 <div class="classic-container">
     <div class="guess golden-border">
@@ -9,12 +10,20 @@
         <div>Type any player to begin.</div>
     </div>
     <form action="">
-        <input type="text" placeholder="Type player name ...">
+        <input type="text"
+               placeholder="Type player name ..."
+               @bind="SearchFilter"
+               @bind:event="oninput" />
         <button type="submit" disabled hidden aria-hidden="true"></button>
         <div id="button"></div>
     </form>
     <div id="reference">
-        <ul id="options"></ul>
+        <ul id="options">
+            @foreach (var player in searchResults)
+            {
+                <li @onclick="() => Guess(player.Id)" >@player.Name</li>
+            }
+        </ul>
 
     </div>
 
@@ -40,10 +49,62 @@
 </div>
 
 @code {
-    private string yesterdaysPlayer;
+    private string searchFilter = string.Empty;
+    private List<Player> searchResults = new List<Player>();
+    private string yesterdaysPlayer = string.Empty;
+    private Timer debounceTimer;
+    private int a= 20;
 
     protected override async Task OnInitializedAsync()
     {
         yesterdaysPlayer = await PlayerService.GetYesterdaysPlayerOTD();
+    }
+
+    private string SearchFilter
+    {
+        get => searchFilter;
+        set
+        {
+            searchFilter = value;
+            TriggerDebouncedSearch();
+        }
+    }
+
+    private async Task Guess(int playerId)
+    {
+        searchResults = new List<Player>();
+        var result = await PlayerService.Guess(playerId);
+    }
+
+
+    private void TriggerDebouncedSearch()
+    {
+        debounceTimer?.Dispose();
+        debounceTimer = new Timer(async _ =>
+        {
+            await InvokeAsync(async () =>
+            {
+                await PerformSearch();
+                StateHasChanged();
+            });
+        }, null, 300, Timeout.Infinite);
+    }
+
+    private async Task PerformSearch()
+    {
+        if (!string.IsNullOrWhiteSpace(searchFilter))
+        {
+            searchResults = await PlayerService.SearchPlayers(searchFilter);
+        }
+        else
+        {
+            searchResults = new List<Player>();
+        }
+    }
+
+    public void Dispose()
+    {
+        debounceTimer?.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
