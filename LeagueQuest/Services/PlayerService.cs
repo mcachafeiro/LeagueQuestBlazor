@@ -69,7 +69,7 @@ namespace LeagueQuest.Services
                 players = await _context.Players
                     .Where(p => p.Name.ToLower().Contains(filter.ToLower()))
                     .OrderBy(p => p.Name)
-                    .Take(10)
+                    .Take(7)
                     .ToListAsync();
             }
 
@@ -99,13 +99,13 @@ namespace LeagueQuest.Services
 
             if (!result.IsPlayer)
             {
-                result.Age.Guessed = player.Date == playerOTD.Date;
-                result.Age.NumberClue = result.Age.Guessed ? null : player.Date > playerOTD.Date ? NumberClue.Lower : NumberClue.Lower;
+                result.Age.Guessed = GetAge(player.Date) == GetAge(playerOTD.Date);
+                result.Age.NumberClue = result.Age.Guessed ? null : player.Date > playerOTD.Date ? NumberClue.Higher : NumberClue.Lower;
 
                 result.Country.Guessed = player.Country == playerOTD.Country;
 
                 result.Number.Guessed = player.Number == playerOTD.Number;
-                result.Number.NumberClue = result.Number.Guessed ? null : player.Number > playerOTD.Number ? NumberClue.Higher : NumberClue.Lower;
+                result.Number.NumberClue = result.Number.Guessed ? null : player.Number > playerOTD.Number ? NumberClue.Lower : NumberClue.Higher;
 
                 result.Team.Guessed = player.Team == playerOTD.Team;
 
@@ -121,6 +121,19 @@ namespace LeagueQuest.Services
             }
 
             return result;
+        }
+        private int GetAge(DateOnly birthDate)
+        {
+            var today = DateOnly.FromDateTime(DateTime.Now);
+
+            int age = today.Year - birthDate.Year;
+
+            if (birthDate > today.AddYears(-age))
+            {
+                age--;
+            }
+
+            return age;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿@page "/Classic"
 @using LeagueQuest.Models
+@using LeagueQuest.DTO
 @using LeagueQuest.Services
 @inject PlayerService PlayerService
 @rendermode InteractiveServer
@@ -21,13 +22,50 @@
         <ul id="options">
             @foreach (var player in searchResults)
             {
-                <li @onclick="() => Guess(player.Id)" >@player.Name</li>
+                <li @onclick="() => Guess(player.Id)"> <img src="/Assets/Players/@(player.Name).png" /> <span>@player.Name</span></li>
             }
         </ul>
 
     </div>
 
-    <div id="answer"></div>
+    <div id="answer">
+        @foreach (var (answer, index) in answers.Select((a, i) => (a, i)))
+        {
+            <div class="clues @(index == answers.Count - 1 ? "animate-last" : "")">
+
+                <div class="player"
+                     style="background-image: url('/Assets/Players/@(answer.Player.Name).png')">
+                    @* mirar showName/hideName *@
+                </div>
+
+                <div class="team"
+                     style="background-image: url('/Assets/Teams/@(answer.Player.Team).png'); background-color: @GetColour(answer.Team)">
+                </div>
+
+                <div class="country"
+                     style="background-color: @GetColour(answer.Country)">
+                    <div style="background-image: url('/Assets/Flags/@(answer.Player.Country).svg');"></div>
+                </div>
+
+                <div class="number"
+                     style="@GetArrow(answer.Number); background-color: @GetColour(answer.Number)">
+                    @answer.Player.Number
+                </div>
+
+                <div class="age"
+                     style="@GetArrow(answer.Age); background-color: @GetColour(answer.Age)">
+                    @GetAge(answer.Player.Date)
+                </div>
+
+                <div class="position"
+                     style="background-color: @GetColour(answer.Position)">
+                    @answer.Player.Position
+                </div>
+
+            </div>
+        }
+    </div>
+
     <div class="color-indicators golden-border">
         <div>Color indicators</div>
         <div class="colors">
@@ -53,7 +91,7 @@
     private List<Player> searchResults = new List<Player>();
     private string yesterdaysPlayer = string.Empty;
     private Timer debounceTimer;
-    private int a= 20;
+    private List<TryDTO> answers = new List<TryDTO>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -73,7 +111,10 @@
     private async Task Guess(int playerId)
     {
         searchResults = new List<Player>();
-        var result = await PlayerService.Guess(playerId);
+        var answer = await PlayerService.Guess(playerId);
+        answers.Add(answer);
+        searchFilter = string.Empty;
+        StateHasChanged();
     }
 
 
@@ -102,9 +143,89 @@
         }
     }
 
-    public void Dispose()
+    private void Dispose()
     {
         debounceTimer?.Dispose();
         GC.SuppressFinalize(this);
     }
+
+    private string GetColour(ClueDTO clue)
+    {
+        var guessedColour = "var(--color-7)";
+        var partialGuessedColour = "var(--color-4)";
+        var notGuessedColour = "var(--color-8)";
+
+        if (clue.Guessed) return guessedColour;
+
+        if (clue.PositionClue.HasValue && clue.PositionClue.Value == PositionClue.Medium) return partialGuessedColour;
+
+        return notGuessedColour;
+    }
+
+    private string GetArrow(ClueDTO clue)
+    {
+        if (clue.Guessed) return string.Empty;
+
+        var arrow = clue.NumberClue == NumberClue.Higher ? "higher" : "lower";
+
+        return "background-image: url('/Assets/Rectangulos/" + arrow + ".svg')";
+    }
+
+    private string GetAge(DateOnly birthDate)
+    {
+        var today = DateOnly.FromDateTime(DateTime.Now);
+
+        int age = today.Year - birthDate.Year;
+
+        if (birthDate > today.AddYears(-age))
+        {
+            age--;
+        }
+
+        return age.ToString();
+    }
 }
+
+<style>
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .animate-last > div {
+        opacity: 0;
+        animation: slideIn 0.5s ease-out forwards;
+    }
+
+    .animate-last > div:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .animate-last > div:nth-child(2) {
+        animation-delay: 0.4s;
+    }
+
+    .animate-last > div:nth-child(3) {
+        animation-delay: 0.7s;
+    }
+
+    .animate-last > div:nth-child(4) {
+        animation-delay: 1.0s;
+    }
+
+    .animate-last > div:nth-child(5) {
+        animation-delay: 1.3s;
+    }
+
+    .animate-last > div:nth-child(6) {
+        animation-delay: 1.6s;
+    }
+
+</style>
